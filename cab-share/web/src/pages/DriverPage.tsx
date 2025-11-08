@@ -1,0 +1,202 @@
+import { useState } from 'react';
+import { Car, Star, MapPin, Send, X, Plus } from 'lucide-react';
+import { proposeRide } from '../lib/api';
+
+export default function DriverPage() {
+  const [rideId, setRideId] = useState('');
+  const [driverAddress] = useState('0x70997970C51812dc3A010C7d01b50e0d17dc79C8');
+  const [attributes, setAttributes] = useState(['verified_driver', '5star_rating', 'premium_vehicle']);
+  const [newAttribute, setNewAttribute] = useState('');
+  const [tripData, setTripData] = useState({
+    destination: '',
+    pricePerSeat: '0.01',
+    availableSeats: 3,
+  });
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<any>(null);
+
+  const addAttribute = () => {
+    if (newAttribute.trim() && !attributes.includes(newAttribute.trim())) {
+      setAttributes([...attributes, newAttribute.trim()]);
+      setNewAttribute('');
+    }
+  };
+
+  const removeAttribute = (attr: string) => {
+    setAttributes(attributes.filter(a => a !== attr));
+  };
+
+  const handlePropose = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const trip = {
+        ...tripData,
+        attributes,
+        departureTime: Math.floor(Date.now() / 1000),
+        arrivalTime: Math.floor(Date.now() / 1000) + 3600,
+        route: 'Optimal route',
+      };
+
+      const response = await proposeRide(rideId, driverAddress, trip);
+      setResult(response);
+    } catch (error: any) {
+      console.error('Error proposing ride:', error);
+      setResult({ error: error.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      <div className="bg-white rounded-lg shadow-xl p-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Propose Ride</h1>
+        
+        <div className="mb-6 p-4 bg-blue-50 rounded-md">
+          <h3 className="font-semibold text-blue-900 mb-3">Your Attributes</h3>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {attributes.map((attr, idx) => (
+              <span
+                key={idx}
+                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-1"
+              >
+                {attr === 'verified_driver' && <Car className="h-4 w-4" />}
+                {attr === '5star_rating' && <Star className="h-4 w-4" />}
+                {attr}
+                <button
+                  type="button"
+                  onClick={() => removeAttribute(attr)}
+                  className="hover:bg-blue-200 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newAttribute}
+              onChange={(e) => setNewAttribute(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addAttribute())}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              placeholder="Add attribute (e.g., premium_vehicle, eco_friendly)"
+            />
+            <button
+              type="button"
+              onClick={addAttribute}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-1"
+            >
+              <Plus className="h-4 w-4" />
+              Add
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={handlePropose} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Ride ID
+            </label>
+            <input
+              type="text"
+              value={rideId}
+              onChange={(e) => setRideId(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="Enter ride ID to propose"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <MapPin className="inline h-4 w-4 mr-1" />
+              Destination
+            </label>
+            <input
+              type="text"
+              value={tripData.destination}
+              onChange={(e) => setTripData({ ...tripData, destination: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="Your destination"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Price per Seat (ETH)
+            </label>
+            <input
+              type="text"
+              value={tripData.pricePerSeat}
+              onChange={(e) => setTripData({ ...tripData, pricePerSeat: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Car className="inline h-4 w-4 mr-1" />
+              Available Seats
+            </label>
+            <input
+              type="number"
+              value={tripData.availableSeats}
+              onChange={(e) => setTripData({ ...tripData, availableSeats: parseInt(e.target.value) })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              min="1"
+              max="8"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex items-center justify-center px-6 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              'Submitting Proposal...'
+            ) : (
+              <>
+                <Send className="h-5 w-5 mr-2" />
+                Propose Ride
+              </>
+            )}
+          </button>
+        </form>
+
+        {result && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-md">
+            {result.error ? (
+              <div className="text-red-600">
+                <strong>Error:</strong> {result.error}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="text-green-600 font-semibold">✓ Proposal Submitted!</div>
+                <div className="text-sm text-gray-600">
+                  <strong>Ride ID:</strong> {result.rideId}
+                </div>
+                <div className="text-sm text-gray-600">
+                  <strong>Driver:</strong> {result.driver?.substring(0, 20)}...
+                </div>
+                <div className="text-sm text-gray-600">
+                  <strong>Tx Hash:</strong> {result.txHash?.substring(0, 20)}...
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  Your deposit is locked. If matched, you'll receive the re-encrypted ride details.
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

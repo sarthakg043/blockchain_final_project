@@ -1,0 +1,18 @@
+{
+  "ct": "{\"ciphertext\": \"9ab19e2e128620b50c2f25f4c19f2556524cd7fedc35962e8ef5bdee6e286a8de599db5cb4de63bb047b08c4c51dcdde956d1d80b2f3444066665fa550757c\", \"tag\": \"a101660775be5b88735d616bb817b9f2\", \"nonce\": \"488f74e8d4f3bf20c81b5081cb859be9\", \"key_shares\": {\"verified_driver\": {\"share\": \"66a60f33c01bafa748094a6b2c495430146c5ed88332933fefd6f9c0c8cfb86b\", \"row\": [1]}, \"5star_rating\": {\"share\": \"fc65db8ef144fe60b1b9afc69331f640861172b95dc80de7d7f35aa601c84982\", \"row\": [1]}}, \"aes_key_encrypted\": \"e1be1d77db6697769baa841b9461e9d0763a014ec012516d8fbeee7742f7c301\"}",
+  "ct_hash": "25e011cc4ccd84f71dcb85979f38a2ad790d6a895dceff21119833380c8c02cc",
+  "policy": {
+    "matrix": [
+      [
+        1
+      ],
+      [
+        1
+      ]
+    ],
+    "rho": {
+      "0": "verified_driver",
+      "1": "5star_rating"
+    }
+  }
+}

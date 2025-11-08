@@ -1,0 +1,27 @@
+{
+  "name": "cab-share-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "contracts",
+    "api",
+    "web",
+    "scripts"
+  ],
+  "scripts": {
+    "install:all": "npm install && cd offchain-crypto && pip install -r requirements.txt",
+    "contracts:compile": "cd contracts && npm run compile",
+    "contracts:test": "cd contracts && npm run test",
+    "contracts:deploy": "cd contracts && npm run deploy:local",
+    "crypto:start": "cd offchain-crypto && python service.py",
+    "api:dev": "cd api && npm run dev",
+    "web:dev": "cd web && npm run dev",
+    "seed": "cd scripts && npm run seed",
+    "demo": "cd scripts && npm run demo",
+    "test:all": "npm run contracts:test && cd api && npm test",
+    "dev": "concurrently \"npm run crypto:start\" \"npm run api:dev\" \"npm run web:dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

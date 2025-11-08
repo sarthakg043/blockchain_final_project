@@ -1,0 +1,5 @@
+{
+  "ct_prime": "{\"ciphertext\": \"b626504bed862f9e82d2535e89d961422924d31e6b7e640e089a703cc67de0903c5ec4c9d7ec032de13ef5e874d3253a0cde5ea4d6173b87adee07eae0\", \"tag\": \"87100384b08a6fd2ba824a725b5373dd\", \"nonce\": \"65a73e83a40c0e286a4f24e9bc7e58a1\", \"reenc_key\": \"56137f6d65161bf06ca0598a8368f36c9925abb7859e13af8676f0155898775f\", \"ptid_to\": \"temp_driver_-1483062926635047877\"}",
+  "ct_prime_hash": "58e4ff88645dce711c77344c17c355c72a7aae3b06e385be44030ea6031c83e5",
+  "r_double_prime": "7600f0b6af0c6affeac29d04959b1b3d18f2d2c8cf821ced9b341976b967b2f7"
+}
