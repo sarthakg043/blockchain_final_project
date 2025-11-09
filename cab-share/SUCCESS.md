@@ -9,7 +9,7 @@ Your decentralized cab-sharing system is now **fully operational on Windows**!
 ## ✅ What Just Worked
 
 ```powershell
-Invoke-RestMethod -Uri http://localhost:5000/api/crypto/setup -Method Post
+Invoke-RestMethod -Uri http://localhost:5123/api/crypto/setup -Method Post
 ```
 
 **Response:**
@@ -126,10 +126,10 @@ Even with Windows-compatible crypto, all security properties from the paper are 
 ### Test Crypto Service
 ```powershell
 # Health check
-Invoke-RestMethod -Uri http://localhost:5000/api/crypto/health -Method Get
+Invoke-RestMethod -Uri http://localhost:5123/api/crypto/health -Method Get
 
 # Setup (already done)
-Invoke-RestMethod -Uri http://localhost:5000/api/crypto/setup -Method Post
+Invoke-RestMethod -Uri http://localhost:5123/api/crypto/setup -Method Post
 
 # Generate keys
 $body = @{
@@ -137,7 +137,7 @@ $body = @{
     user_id = "driver1"
 } | ConvertTo-Json
 
-Invoke-RestMethod -Uri http://localhost:5000/api/crypto/keygen -Method Post -Body $body -ContentType "application/json"
+Invoke-RestMethod -Uri http://localhost:5123/api/crypto/keygen -Method Post -Body $body -ContentType "application/json"
 ```
 
 ---
@@ -156,7 +156,7 @@ python service.py
 
 ### Check Service Status
 ```powershell
-Invoke-RestMethod -Uri http://localhost:5000/api/crypto/health -Method Get
+Invoke-RestMethod -Uri http://localhost:5123/api/crypto/health -Method Get
 ```
 
 ### View Logs

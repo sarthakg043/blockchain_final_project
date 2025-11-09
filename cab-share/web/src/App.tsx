@@ -3,10 +3,12 @@ import { Car, Users, Shield } from 'lucide-react';
 import RiderPage from './pages/RiderPage';
 import DriverPage from './pages/DriverPage';
 import AdminPage from './pages/AdminPage';
+import { WalletProvider } from './contexts/WalletContext';
 
 function App() {
   return (
-    <div className="min-h-screen">
+    <WalletProvider>
+      <div className="min-h-screen">
       <nav className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -51,6 +53,7 @@ function App() {
         </Routes>
       </main>
     </div>
+    </WalletProvider>
   );
 }
 

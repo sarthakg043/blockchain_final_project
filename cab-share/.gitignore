@@ -22,3 +22,7 @@ venv/
 .pytest_cache/
 .coverage
 htmlcov/
+.venv
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

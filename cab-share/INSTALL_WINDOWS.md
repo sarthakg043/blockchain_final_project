@@ -76,7 +76,7 @@ python service.py
 **Terminal 4 - Initialize Crypto & Start API:**
 ```powershell
 # Initialize (only once)
-curl -X POST http://localhost:5000/api/crypto/setup
+curl -X POST http://localhost:5123/api/crypto/setup
 
 # Start API
 cd api
@@ -138,7 +138,7 @@ All algorithms from the paper are still implemented:
 
 ```powershell
 # Test crypto service
-curl http://localhost:5000/api/crypto/health
+curl http://localhost:5123/api/crypto/health
 
 # Expected response:
 # {"status": "healthy", "message": "CP-ABE Crypto Service is running"}
@@ -156,12 +156,12 @@ pip uninstall crypto pycrypto
 pip install pycryptodome
 ```
 
-### Issue: Port 5000 already in use
+### Issue: Port 5123 already in use
 
 **Solution:**
 ```powershell
-# Find and kill process on port 5000
-netstat -ano | findstr :5000
+# Find and kill process on port 5123
+netstat -ano | findstr :5123
 taskkill /PID <PID> /F
 ```
 

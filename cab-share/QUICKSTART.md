@@ -50,12 +50,12 @@ npm run deploy:local
 cd offchain-crypto
 python service.py
 ```
-✓ CP-ABE service running on port 5000
+✓ CP-ABE service running on port 5123
 
 **Terminal 4 - Initialize & Start API:**
 ```powershell
 # Initialize crypto system (PowerShell)
-Invoke-RestMethod -Uri http://localhost:5000/api/crypto/setup -Method Post
+Invoke-RestMethod -Uri http://localhost:5123/api/crypto/setup -Method Post
 
 # Start API gateway
 cd api

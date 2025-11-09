@@ -23,9 +23,10 @@ export const createRide = async (plaintext: string, policy: AccessPolicy, riderA
   return response.data;
 };
 
-export const proposeRide = async (rideId: string, driverAddress: string, trip: any) => {
+export const proposeRide = async (rideId: string, driverAddress: string, driverPrivateKey: string, trip: any) => {
   const response = await api.post(`/api/rides/${rideId}/proposals`, {
     driverAddress,
+    driverPrivateKey,
     trip,
   });
   return response.data;

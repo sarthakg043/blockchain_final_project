@@ -52,12 +52,12 @@ python service.py
 ```
 ╔══════════════════════════════════════════════════════════╗
 ║  CP-ABE Proxy Re-Encryption Service                      ║
-║  Port: 5000                                              ║
+║  Port: 5123                                              ║
 ╚══════════════════════════════════════════════════════════╝
- * Running on http://127.0.0.1:5000
+ * Running on http://127.0.0.1:5123
 ```
 
-**⚠️ VERIFY:** Make sure you see `Running on http://127.0.0.1:5000` and NO errors!
+**⚠️ VERIFY:** Make sure you see `Running on http://127.0.0.1:5123` and NO errors!
 
 ---
 
@@ -87,7 +87,7 @@ Before trying to match, **test the crypto service directly**:
 
 ```powershell
 # Test health endpoint
-Invoke-RestMethod -Uri http://localhost:5000/api/crypto/health -Method Get
+Invoke-RestMethod -Uri http://localhost:5123/api/crypto/health -Method Get
 ```
 
 **Expected output:**
@@ -106,7 +106,7 @@ Invoke-RestMethod -Uri http://localhost:5000/api/crypto/health -Method Get
 ## 🎯 **Step 4: Initialize Crypto System**
 
 ```powershell
-Invoke-RestMethod -Uri http://localhost:5000/api/crypto/setup -Method Post
+Invoke-RestMethod -Uri http://localhost:5123/api/crypto/setup -Method Post
 ```
 
 **Expected output:**
@@ -161,7 +161,7 @@ cd C:\Users\saigo\OneDrive\Desktop\blockchain\cab-share\offchain-crypto
 python service.py
 ```
 
-#### ❌ Issue: "Port 5000 already in use"
+#### ❌ Issue: "Port 5123 already in use"
 **Fix:** Kill the old Python process:
 ```powershell
 Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force
@@ -181,11 +181,11 @@ python service.py
 Before trying to match, verify:
 
 - [ ] Terminal 1: Hardhat node running (port 8545)
-- [ ] Terminal 2: Crypto service running (port 5000) - **FRESH START**
+- [ ] Terminal 2: Crypto service running (port 5123) - **FRESH START**
 - [ ] Terminal 3: API gateway running (port 3001)
 - [ ] Terminal 4: Web UI running (port 5173)
-- [ ] Crypto health check passes: `Invoke-RestMethod -Uri http://localhost:5000/api/crypto/health -Method Get`
-- [ ] Crypto setup done: `Invoke-RestMethod -Uri http://localhost:5000/api/crypto/setup -Method Post`
+- [ ] Crypto health check passes: `Invoke-RestMethod -Uri http://localhost:5123/api/crypto/health -Method Get`
+- [ ] Crypto setup done: `Invoke-RestMethod -Uri http://localhost:5123/api/crypto/setup -Method Post`
 
 ---
 

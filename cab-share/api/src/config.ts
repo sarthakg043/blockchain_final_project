@@ -27,7 +27,7 @@ export const config = {
   },
   
   cryptoService: {
-    url: process.env.CRYPTO_SERVICE_URL || 'http://localhost:5000',
+    url: process.env.CRYPTO_SERVICE_URL || 'http://localhost:5123',
   },
   
   storage: {

@@ -43,7 +43,7 @@ cd offchain-crypto
 python service.py
 ```
 
-**Wait for:** `Running on http://127.0.0.1:5000`
+**Wait for:** `Running on http://127.0.0.1:5123`
 
 ✅ **Already running!** Keep it running.
 
@@ -52,7 +52,7 @@ python service.py
 ### 4️⃣ **Terminal 4: Initialize Crypto & Start API** (FOURTH!)
 ```powershell
 # Initialize crypto (only once)
-Invoke-RestMethod -Uri http://localhost:5000/api/crypto/setup -Method Post
+Invoke-RestMethod -Uri http://localhost:5123/api/crypto/setup -Method Post
 
 # Start API
 cd api
@@ -96,7 +96,7 @@ Copy-Item .env.example .env
 **Cause:** Contracts not deployed  
 **Fix:** Run Terminal 2 after Terminal 1 is running
 
-### Error: "ECONNREFUSED localhost:5000"
+### Error: "ECONNREFUSED localhost:5123"
 **Cause:** Crypto service not running  
 **Fix:** Start Terminal 3
 
@@ -112,7 +112,7 @@ curl http://127.0.0.1:8545
 
 ### Is Crypto Service Running?
 ```powershell
-Invoke-RestMethod -Uri http://localhost:5000/api/crypto/health -Method Get
+Invoke-RestMethod -Uri http://localhost:5123/api/crypto/health -Method Get
 # Should return: {"status": "healthy"}
 ```
 

@@ -46,7 +46,7 @@ def health():
     return {'status': 'healthy'}, 200
 
 if __name__ == '__main__':
-    port = int(os.getenv('CRYPTO_SERVICE_PORT', 5000))
+    port = int(os.getenv('CRYPTO_SERVICE_PORT', 5123))
     debug = os.getenv('FLASK_ENV') == 'development'
     
     print(f"""

@@ -63,7 +63,7 @@ pip install -r requirements.txt
 
 # 2. Start the crypto service
 python service.py
-# ✅ Running on http://localhost:5000
+# ✅ Running on http://localhost:5123
 ```
 
 ---

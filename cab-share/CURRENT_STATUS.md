@@ -2,7 +2,7 @@
 
 ## ✅ What's Working
 
-1. ✅ **Crypto Service** - Running on port 5000
+1. ✅ **Crypto Service** - Running on port 5123
 2. ✅ **`.env` file** - Created with correct configuration
 3. ✅ **Contract addresses** - Already in `.env`
 

@@ -79,7 +79,7 @@ Once all 5 terminals are running, open: **http://localhost:5173**
 ## 📋 Quick Checklist
 
 - [ ] Terminal 1: Hardhat node running on port 8545
-- [ ] Terminal 3: Crypto service running on port 5000 ✅
+- [ ] Terminal 3: Crypto service running on port 5123 ✅
 - [ ] Terminal 4: API running on port 3001
 - [ ] Terminal 5: Web UI running on port 5173
 - [ ] Browser open at http://localhost:5173

@@ -229,18 +229,18 @@ python service.py
 ```
 ╔══════════════════════════════════════════════════════════╗
 ║  CP-ABE Proxy Re-Encryption Service                      ║
-║  Port: 5000                                              ║
+║  Port: 5123                                              ║
 ║  Paper: Decentralized Cab-Sharing with Blockchain        ║
 ╚══════════════════════════════════════════════════════════╝
 
- * Running on http://0.0.0.0:5000
+ * Running on http://0.0.0.0:5123
 ```
 
 ### Step 4: Initialize Crypto System
 
 Open **Terminal 4**:
 ```bash
-curl -X POST http://localhost:5000/api/crypto/setup
+curl -X POST http://localhost:5123/api/crypto/setup
 ```
 
 ### Step 5: Start API Gateway
@@ -327,6 +327,7 @@ curl -X POST http://localhost:3001/api/rides/{RIDE_ID}/proposals \
   -H "Content-Type: application/json" \
   -d '{
     "driverAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "driverPrivateKey": "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
     "trip": {
       "destination": "Airport",
       "attributes": ["verified_driver", "5star_rating"],
@@ -334,6 +335,8 @@ curl -X POST http://localhost:3001/api/rides/{RIDE_ID}/proposals \
     }
   }'
 ```
+
+**Note:** The `driverPrivateKey` field is required. Use Hardhat test account #1 private key shown above for local testing.
 
 **3. Match Driver:**
 ```bash
@@ -548,8 +551,8 @@ npm run deploy:local
 ### Issue: Crypto Service Not Responding
 
 ```bash
-# Check if port 5000 is available
-netstat -an | grep 5000
+# Check if port 5123 is available
+netstat -an | grep 5123
 
 # Restart service
 cd offchain-crypto
@@ -611,7 +614,7 @@ cd contracts && npm run deploy:local
 cd offchain-crypto && python service.py
 
 # Terminal 4: Initialize + API
-curl -X POST http://localhost:5000/api/crypto/setup
+curl -X POST http://localhost:5123/api/crypto/setup
 cd api && npm run dev
 
 # Terminal 5: Web UI

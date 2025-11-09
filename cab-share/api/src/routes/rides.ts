@@ -94,7 +94,7 @@ router.post('/', async (req, res) => {
 router.post('/:id/proposals', async (req, res) => {
   try {
     const { id: rideId } = req.params;
-    const { driverAddress, trip } = req.body;
+    const { driverAddress, driverPrivateKey, trip } = req.body;
 
     if (!trip || !trip.attributes) {
       return res.status(400).json({ error: 'Missing trip data or attributes' });
@@ -115,7 +115,36 @@ router.post('/:id/proposals', async (req, res) => {
       attributes: hashedAttributes
     };
 
-    const cabShareCore = getCabShareCore();
+    // Create driver-specific wallet if private key provided
+    let driverWallet;
+    if (driverPrivateKey) {
+      // Use driver's private key
+      const { provider } = await import('../eth/contracts.js');
+      driverWallet = new ethers.Wallet(driverPrivateKey, provider);
+      
+      // Verify the private key matches the address
+      if (driverWallet.address.toLowerCase() !== driverAddress.toLowerCase()) {
+        return res.status(400).json({ 
+          error: 'Private key does not match driver address',
+          expected: driverAddress,
+          actual: driverWallet.address
+        });
+      }
+    } else {
+      // Fallback: Use API wallet (less secure, for testing only)
+      console.warn('⚠️  WARNING: Using API wallet for driver transaction. This should only be used for testing!');
+      const { wallet } = await import('../eth/contracts.js');
+      driverWallet = wallet;
+    }
+
+    // Load contract ABI
+    const abiPath = path.join(process.cwd(), '..', 'contracts', 'artifacts', 'contracts', 'CabShareCore.sol', 'CabShareCore.json');
+    const artifact = JSON.parse(await fs.readFile(abiPath, 'utf8'));
+    const { provider } = await import('../eth/contracts.js');
+    const config = (await import('../config.js')).default;
+    
+    // Create contract instance with driver's wallet
+    const cabShareCore = new ethers.Contract(config.contracts.cabShareCore, artifact.abi, driverWallet);
     const minDeposit = ethers.parseEther('0.02');
 
     const tx = await cabShareCore.proposeRide(rideId, driverTrip, { value: minDeposit });
@@ -136,7 +165,7 @@ router.post('/:id/proposals', async (req, res) => {
 
 /**
  * POST /rides/:id/match
- * Admin/delegate matches driver
+ * Check policy match and prepare re-encryption (blockchain call done by frontend)
  */
 router.post('/:id/match', async (req, res) => {
   try {
@@ -156,13 +185,11 @@ router.post('/:id/match', async (req, res) => {
     console.log('Match result:', matches);
     
     if (!matches) {
-      return res.status(400).json({ error: 'Driver attributes do not satisfy policy' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'Driver attributes do not satisfy policy' 
+      });
     }
-
-    // Match driver on-chain
-    const cabShareCore = getCabShareCore();
-    const tx = await cabShareCore.matchDriver(rideId, driverAddress);
-    await tx.wait();
 
     // Generate re-encryption key
     const originalCt = await loadFromStorage(`ct_${rideId}.json`);
@@ -177,26 +204,21 @@ router.post('/:id/match', async (req, res) => {
     
     // Store CT' off-chain
     await saveToStorage(`ct_prime_${rideId}.json`, reencryptResult.ct_prime);
-    
-    // Submit CT' hash on-chain
-    const tx2 = await cabShareCore.submitReencryption(
-      rideId,
-      `0x${reencryptResult.ct_prime_hash}`
-    );
-    await tx2.wait();
 
     res.json({
       success: true,
       rideId,
       driver: driverAddress,
       ctPrimeHash: reencryptResult.ct_prime_hash,
-      matchTxHash: tx.hash,
-      reencryptTxHash: tx2.hash
+      message: 'Policy matched and re-encryption prepared. Frontend will submit to blockchain.'
     });
 
   } catch (error: any) {
     console.error('Error matching driver:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
   }
 });
 
