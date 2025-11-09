@@ -155,61 +155,11 @@ router.post('/', async (req, res) => {
 router.post('/:id/proposals', async (req, res) => {
   try {
     const { id: rideId } = req.params;
-    const { driverAddress, driverPrivateKey, trip } = req.body;
+    const { driverAddress, trip } = req.body;
 
     if (!trip || !trip.attributes) {
       return res.status(400).json({ error: 'Missing trip data or attributes' });
     }
-
-    // Hash attributes
-    const hashedAttributes = trip.attributes.map((attr: string) =>
-      ethers.keccak256(ethers.toUtf8Bytes(attr))
-    );
-
-    const driverTrip = {
-      departureTime: trip.departureTime || Math.floor(Date.now() / 1000),
-      destination: trip.destination || '',
-      arrivalTime: trip.arrivalTime || Math.floor(Date.now() / 1000) + 3600,
-      route: trip.route || '',
-      availableSeats: trip.availableSeats || 1,
-      pricePerSeat: ethers.parseEther(trip.pricePerSeat || '0.01'),
-      attributes: hashedAttributes
-    };
-
-    // Create driver-specific wallet if private key provided
-    let driverWallet;
-    if (driverPrivateKey) {
-      // Use driver's private key
-      const { provider } = await import('../eth/contracts.js');
-      driverWallet = new ethers.Wallet(driverPrivateKey, provider);
-      
-      // Verify the private key matches the address
-      if (driverWallet.address.toLowerCase() !== driverAddress.toLowerCase()) {
-        return res.status(400).json({ 
-          error: 'Private key does not match driver address',
-          expected: driverAddress,
-          actual: driverWallet.address
-        });
-      }
-    } else {
-      // Fallback: Use API wallet (less secure, for testing only)
-      console.warn('⚠️  WARNING: Using API wallet for driver transaction. This should only be used for testing!');
-      const { wallet } = await import('../eth/contracts.js');
-      driverWallet = wallet;
-    }
-
-    // Load contract ABI
-    const abiPath = path.join(process.cwd(), '..', 'contracts', 'artifacts', 'contracts', 'CabShareCore.sol', 'CabShareCore.json');
-    const artifact = JSON.parse(await fs.readFile(abiPath, 'utf8'));
-    const { provider } = await import('../eth/contracts.js');
-    const config = (await import('../config.js')).default;
-    
-    // Create contract instance with driver's wallet
-    const cabShareCore = new ethers.Contract(config.contracts.cabShareCore, artifact.abi, driverWallet);
-    const minDeposit = ethers.parseEther('0.02');
-
-    const tx = await cabShareCore.proposeRide(rideId, driverTrip, { value: minDeposit });
-    await tx.wait();
 
     // Update ride pool - increment proposal count and change status
     const ridePool = await loadRidePool();
@@ -220,11 +170,26 @@ router.post('/:id/proposals', async (req, res) => {
     }
     await saveRidePool(ridePool);
 
+    // Log proposal details for admin
+    console.log('\n' + '='.repeat(80));
+    console.log('🚗 NEW DRIVER PROPOSAL');
+    console.log('='.repeat(80));
+    console.log(`Ride ID:          ${rideId}`);
+    console.log(`Driver Address:   ${driverAddress}`);
+    console.log(`Departure Time:   ${new Date(trip.departureTime * 1000).toLocaleString()}`);
+    console.log(`Destination:      ${trip.destination || 'Not specified'}`);
+    console.log(`Route:            ${trip.route || 'Not specified'}`);
+    console.log(`Available Seats:  ${trip.availableSeats || 1}`);
+    console.log(`Price per Seat:   ${trip.pricePerSeat} ETH`);
+    console.log(`Attributes:       ${trip.attributes.join(', ')}`);
+    console.log(`Proposal Count:   ${ridePool.rides[rideIndex]?.proposalCount || 1}`);
+    console.log('='.repeat(80) + '\n');
+
     res.json({
       success: true,
       rideId,
       driver: driverAddress,
-      txHash: tx.hash
+      message: 'Proposal logged successfully'
     });
 
   } catch (error: any) {

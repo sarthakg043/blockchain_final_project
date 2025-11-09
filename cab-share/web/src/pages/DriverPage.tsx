@@ -98,6 +98,32 @@ export default function DriverPage() {
       const receipt = await tx.wait();
       
       console.log('Transaction confirmed:', receipt);
+      
+      // Notify API about the proposal for ride pool update and logging
+      try {
+        const apiResponse = await fetch(`http://localhost:3001/api/rides/${rideId}/proposals`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            driverAddress: address,
+            trip: {
+              departureTime: Math.floor(Date.now() / 1000),
+              destination: tripData.destination,
+              arrivalTime: Math.floor(Date.now() / 1000) + 3600,
+              route: 'Optimal route',
+              availableSeats: tripData.availableSeats,
+              pricePerSeat: tripData.pricePerSeat,
+              attributes: attributes
+            }
+          })
+        });
+        
+        const apiData = await apiResponse.json();
+        console.log('API notified:', apiData);
+      } catch (apiError) {
+        console.warn('Failed to notify API (non-critical):', apiError);
+      }
+      
       setResult({
         success: true,
         rideId,
