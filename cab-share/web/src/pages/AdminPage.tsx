@@ -75,12 +75,15 @@ export default function AdminPage() {
       let errorMessage = error.message;
       
       // Handle common errors
-      if (error.code === 4001) {
-        errorMessage = 'Transaction rejected by user';
+      if (error.code === 4001 || error.code === 'ACTION_REJECTED' || error.message.includes('user rejected')) {
+        errorMessage = 'Transaction rejected: You denied the transaction in MetaMask';
       } else if (error.message.includes('Only admin')) {
         errorMessage = 'Only admin can match drivers. Please use the admin wallet (Account #0)';
       } else if (error.message.includes('insufficient funds')) {
         errorMessage = 'Insufficient ETH balance';
+      } else if (error.message.length > 200) {
+        // If error message is too long, show a generic message
+        errorMessage = 'Transaction failed. Please check console for details.';
       }
       
       setResult({ error: errorMessage });

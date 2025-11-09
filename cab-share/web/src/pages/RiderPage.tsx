@@ -6,7 +6,7 @@ export default function RiderPage() {
   const [formData, setFormData] = useState({
     pickup: '',
     destination: '',
-    time: '',
+    datetime: '',
     price: '',
     riderAddress: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
   });
@@ -32,7 +32,10 @@ export default function RiderPage() {
     setResult(null);
 
     try {
-      const plaintext = `Pickup: ${formData.pickup}, Destination: ${formData.destination}, Time: ${formData.time}, Price: ${formData.price}`;
+      // Convert datetime to timestamp
+      const timestamp = formData.datetime ? Math.floor(new Date(formData.datetime).getTime() / 1000) : Math.floor(Date.now() / 1000);
+      
+      const plaintext = `Pickup: ${formData.pickup}, Destination: ${formData.destination}, Time: ${new Date(formData.datetime).toLocaleString()}, Price: ${formData.price}`;
       
       // Create simple access policy (M, ρ)
       const policy = {
@@ -40,7 +43,16 @@ export default function RiderPage() {
         rho: attributes.reduce((acc, attr, idx) => ({ ...acc, [idx]: attr }), {}),
       };
 
-      const response = await createRide(plaintext, policy, formData.riderAddress);
+      // Send metadata separately for ride pool display
+      const rideMetadata = {
+        destination: formData.destination,
+        pickup: formData.pickup,
+        time: new Date(formData.datetime).toLocaleString(),
+        timestamp: timestamp,
+        price: formData.price
+      };
+
+      const response = await createRide(plaintext, policy, formData.riderAddress, rideMetadata);
       setResult(response);
     } catch (error: any) {
       console.error('Error creating ride:', error);
@@ -89,16 +101,19 @@ export default function RiderPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Clock className="inline h-4 w-4 mr-1" />
-              Pickup Time
+              Departure Date & Time
             </label>
             <input
-              type="text"
-              value={formData.time}
-              onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+              type="datetime-local"
+              value={formData.datetime}
+              onChange={(e) => setFormData({ ...formData, datetime: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder="e.g., 2:00 PM"
+              min={new Date().toISOString().slice(0, 16)}
               required
             />
+            <p className="mt-1 text-xs text-gray-500">
+              Select your preferred departure date and time
+            </p>
           </div>
 
           <div>

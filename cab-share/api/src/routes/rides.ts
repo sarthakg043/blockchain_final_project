@@ -26,13 +26,55 @@ const loadFromStorage = async (filename: string) => {
   }
 };
 
+// Storage for ride pool
+const RIDE_DATA_FILE = 'ride_data.json';
+const FULFILLED_RIDES_FILE = 'fulfilled_rides.json';
+
+const loadRidePool = async () => {
+  try {
+    return await loadFromStorage(RIDE_DATA_FILE);
+  } catch {
+    return { rides: [] };
+  }
+};
+
+const saveRidePool = async (ridePool: any) => {
+  await saveToStorage(RIDE_DATA_FILE, ridePool);
+};
+
+const loadFulfilledRides = async () => {
+  try {
+    return await loadFromStorage(FULFILLED_RIDES_FILE);
+  } catch {
+    return { rides: [] };
+  }
+};
+
+const saveFulfilledRides = async (fulfilledRides: any) => {
+  await saveToStorage(FULFILLED_RIDES_FILE, fulfilledRides);
+};
+
+/**
+ * GET /rides/pool
+ * Get all unfulfilled rides
+ */
+router.get('/pool', async (req, res) => {
+  try {
+    const ridePool = await loadRidePool();
+    res.json(ridePool);
+  } catch (error: any) {
+    console.error('Error loading ride pool:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 /**
  * POST /rides
  * Create encrypted ride request
  */
 router.post('/', async (req, res) => {
   try {
-    const { plaintext, policy, riderAddress } = req.body;
+    const { plaintext, policy, riderAddress, rideMetadata } = req.body;
 
     if (!plaintext || !policy) {
       return res.status(400).json({ error: 'Missing plaintext or policy' });
@@ -72,6 +114,25 @@ router.post('/', async (req, res) => {
     );
     
     await tx.wait();
+    
+    // Add ride to pool
+    const ridePool = await loadRidePool();
+    ridePool.rides = ridePool.rides || [];
+    ridePool.rides.push({
+      rideId,
+      riderAddress,
+      destination: rideMetadata?.destination || 'Not specified',
+      pickup: rideMetadata?.pickup || 'Not specified',
+      departureTime: accessPolicy.earliestArrival,
+      latestArrival: accessPolicy.latestArrival,
+      minAttributes: accessPolicy.minAttributes,
+      price: rideMetadata?.price || 'Not specified',
+      time: rideMetadata?.time || 'Not specified',
+      status: 0, // Requested
+      createdAt: Math.floor(Date.now() / 1000),
+      proposalCount: 0
+    });
+    await saveRidePool(ridePool);
     
     res.json({
       success: true,
@@ -150,6 +211,15 @@ router.post('/:id/proposals', async (req, res) => {
     const tx = await cabShareCore.proposeRide(rideId, driverTrip, { value: minDeposit });
     await tx.wait();
 
+    // Update ride pool - increment proposal count and change status
+    const ridePool = await loadRidePool();
+    const rideIndex = ridePool.rides.findIndex((r: any) => r.rideId === rideId);
+    if (rideIndex !== -1) {
+      ridePool.rides[rideIndex].proposalCount = (ridePool.rides[rideIndex].proposalCount || 0) + 1;
+      ridePool.rides[rideIndex].status = 1; // Proposed
+    }
+    await saveRidePool(ridePool);
+
     res.json({
       success: true,
       rideId,
@@ -204,6 +274,28 @@ router.post('/:id/match', async (req, res) => {
     
     // Store CT' off-chain
     await saveToStorage(`ct_prime_${rideId}.json`, reencryptResult.ct_prime);
+
+    // Move ride from pool to fulfilled
+    const ridePool = await loadRidePool();
+    const rideIndex = ridePool.rides.findIndex((r: any) => r.rideId === rideId);
+    if (rideIndex !== -1) {
+      const fulfilledRide = { 
+        ...ridePool.rides[rideIndex], 
+        status: 2, // Matched
+        matchedDriver: driverAddress,
+        matchedAt: Math.floor(Date.now() / 1000)
+      };
+      
+      // Remove from pool
+      ridePool.rides.splice(rideIndex, 1);
+      await saveRidePool(ridePool);
+      
+      // Add to fulfilled
+      const fulfilledRides = await loadFulfilledRides();
+      fulfilledRides.rides = fulfilledRides.rides || [];
+      fulfilledRides.rides.push(fulfilledRide);
+      await saveFulfilledRides(fulfilledRides);
+    }
 
     res.json({
       success: true,

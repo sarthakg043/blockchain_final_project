@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Clock, DollarSign, Users, RefreshCw, Car } from 'lucide-react';
+import { MapPin, Clock, Users, RefreshCw, Car } from 'lucide-react';
 import { getRidePool } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,12 +7,15 @@ interface Ride {
   rideId: string;
   riderAddress: string;
   destination?: string;
+  pickup?: string;
   departureTime?: number;
   latestArrival?: number;
   minAttributes?: number;
   status: number;
   createdAt: number;
   proposalCount?: number;
+  price?: string;
+  time?: string;
 }
 
 export default function RidePoolPage() {
@@ -64,9 +67,29 @@ export default function RidePoolPage() {
     return date.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
     });
+  };
+
+  const formatTimeString = (timeString?: string) => {
+    if (!timeString) return null;
+    try {
+      // Try parsing the time string as a date
+      const date = new Date(timeString);
+      if (isNaN(date.getTime())) return timeString; // Return original if invalid
+      
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch {
+      return timeString;
+    }
   };
 
   const formatAddress = (address: string) => {
@@ -129,10 +152,10 @@ export default function RidePoolPage() {
                     Rider
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Destination
+                    Pickup → Destination
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Time
+                    Time & Price
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -160,16 +183,29 @@ export default function RidePoolPage() {
                         {formatAddress(ride.riderAddress)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-900">
-                        <MapPin className="h-4 w-4 mr-1 text-gray-400" />
-                        {ride.destination || 'Not specified'}
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">
+                        <div className="flex items-center mb-1">
+                          <MapPin className="h-3 w-3 mr-1 text-green-500" />
+                          <span className="font-medium">{ride.pickup || 'Not specified'}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <MapPin className="h-3 w-3 mr-1 text-red-500" />
+                          <span className="font-medium">{ride.destination || 'Not specified'}</span>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Clock className="h-4 w-4 mr-1 text-gray-400" />
-                        {formatTimestamp(ride.departureTime || ride.createdAt)}
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">
+                        <div className="flex items-center mb-1">
+                          <Clock className="h-3 w-3 mr-1 text-gray-400" />
+                          {formatTimeString(ride.time) || formatTimestamp(ride.departureTime || ride.createdAt)}
+                        </div>
+                        {ride.price && (
+                          <div className="text-xs text-green-600 font-semibold">
+                            {ride.price} ETH
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

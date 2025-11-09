@@ -14,11 +14,12 @@ export interface AccessPolicy {
   rho: { [key: number]: string };
 }
 
-export const createRide = async (plaintext: string, policy: AccessPolicy, riderAddress: string) => {
+export const createRide = async (plaintext: string, policy: AccessPolicy, riderAddress: string, rideMetadata?: { destination: string; pickup: string; time: string; price: string }) => {
   const response = await api.post('/api/rides', {
     plaintext,
     policy,
     riderAddress,
+    rideMetadata,
   });
   return response.data;
 };
@@ -52,5 +53,10 @@ export const completeRide = async (rideId: string) => {
 
 export const decryptRide = async (rideId: string, userPtid: string) => {
   const response = await api.get(`/api/rides/${rideId}/decrypt?userPtid=${userPtid}`);
+  return response.data;
+};
+
+export const getRidePool = async () => {
+  const response = await api.get('/api/rides/pool');
   return response.data;
 };

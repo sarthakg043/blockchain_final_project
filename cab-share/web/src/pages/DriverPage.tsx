@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Car, Star, MapPin, Send, X, Plus, Wallet } from 'lucide-react';
 import { useWallet } from '../contexts/WalletContext';
 import { Contract, ethers } from 'ethers';
+import { useLocation } from 'react-router-dom';
 
 export default function DriverPage() {
   const { address, provider, isConnected, connect } = useWallet();
+  const location = useLocation();
   const [rideId, setRideId] = useState('');
   const [attributes, setAttributes] = useState(['verified_driver', '5star_rating', 'premium_vehicle']);
   const [newAttribute, setNewAttribute] = useState('');
@@ -15,6 +17,13 @@ export default function DriverPage() {
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+
+  // Pre-fill ride ID if coming from ride pool
+  useEffect(() => {
+    if (location.state?.rideId) {
+      setRideId(location.state.rideId);
+    }
+  }, [location.state]);
 
   // Contract address - update this with your deployed contract
   const CONTRACT_ADDRESS = '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9';
@@ -102,12 +111,15 @@ export default function DriverPage() {
       let errorMessage = error.message;
       
       // Handle common errors
-      if (error.code === 4001) {
-        errorMessage = 'Transaction rejected by user';
+      if (error.code === 4001 || error.code === 'ACTION_REJECTED' || error.message.includes('user rejected')) {
+        errorMessage = 'Transaction rejected: You denied the transaction in MetaMask';
       } else if (error.message.includes('Rider cannot propose')) {
         errorMessage = 'This address is registered as a rider and cannot propose rides';
       } else if (error.message.includes('insufficient funds')) {
         errorMessage = 'Insufficient ETH balance for deposit';
+      } else if (error.message.length > 200) {
+        // If error message is too long, show a generic message
+        errorMessage = 'Transaction failed. Please check console for details.';
       }
       
       setResult({ error: errorMessage });

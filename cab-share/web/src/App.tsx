@@ -1,8 +1,9 @@
 import { Routes, Route, Link } from 'react-router-dom';
-import { Car, Users, Shield } from 'lucide-react';
+import { Car, Users, Shield, List } from 'lucide-react';
 import RiderPage from './pages/RiderPage';
 import DriverPage from './pages/DriverPage';
 import AdminPage from './pages/AdminPage';
+import RidePoolPage from './pages/RidePoolPage';
 import { WalletProvider } from './contexts/WalletContext';
 
 function App() {
@@ -27,6 +28,13 @@ function App() {
                 Rider
               </Link>
               <Link
+                to="/pool"
+                className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50"
+              >
+                <List className="h-4 w-4 mr-1" />
+                Ride Pool
+              </Link>
+              <Link
                 to="/driver"
                 className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50"
               >
@@ -48,6 +56,7 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Routes>
           <Route path="/" element={<RiderPage />} />
+          <Route path="/pool" element={<RidePoolPage />} />
           <Route path="/driver" element={<DriverPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
